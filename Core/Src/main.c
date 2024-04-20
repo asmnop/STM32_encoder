@@ -70,6 +70,9 @@ int main(void)
 	uint8_t enco_A1_state = 0;
 	uint8_t enco_B1_state = 0;
 
+	uint8_t enco_A1_state_old = 0;
+	uint8_t enco_B1_state_old = 0;
+
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -121,9 +124,16 @@ int main(void)
 		  enco_B1_state = 1;
 	  }
 
-		sprintf((char*)msg, "A1: %d B1: %d\n\r", enco_A1_state, enco_B1_state);
-		HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 1000);
-		HAL_Delay(50);
+	  if( (enco_A1_state != enco_A1_state_old) || (enco_B1_state != enco_B1_state_old) )
+	  {
+			sprintf((char*)msg, "A1: %d B1: %d\n\r", enco_A1_state, enco_B1_state);
+			HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 1000);
+	  }
+
+	  enco_A1_state_old = enco_A1_state;
+	  enco_B1_state_old = enco_B1_state;
+
+		//HAL_Delay(50);
 
     /* USER CODE END WHILE */
 

@@ -94,6 +94,14 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  if(HAL_GPIO_ReadPin(ENCO_A1_GPIO_Port, ENCO_A1_Pin) == GPIO_PIN_RESET)
+	  {
+		  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+	  }
+	  else if(HAL_GPIO_ReadPin(ENCO_A1_GPIO_Port, ENCO_A1_Pin) == GPIO_PIN_SET)
+	  {
+		  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

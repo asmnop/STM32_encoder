@@ -1,0 +1,1 @@
+All about encoder in STM32L476RG

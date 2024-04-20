@@ -23,7 +23,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdio.h>
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -64,6 +65,10 @@ void SystemClock_Config(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+	char msg[64];
+
+	uint8_t enco_A1_state = 0;
+	uint8_t enco_B1_state = 0;
 
   /* USER CODE END 1 */
 
@@ -97,11 +102,29 @@ int main(void)
 	  if(HAL_GPIO_ReadPin(ENCO_A1_GPIO_Port, ENCO_A1_Pin) == GPIO_PIN_RESET)
 	  {
 		  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+		  enco_A1_state = 0;
 	  }
 	  else if(HAL_GPIO_ReadPin(ENCO_A1_GPIO_Port, ENCO_A1_Pin) == GPIO_PIN_SET)
 	  {
 		  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+		  enco_A1_state = 1;
 	  }
+
+	  if(HAL_GPIO_ReadPin(ENCO_B1_GPIO_Port, ENCO_B1_Pin) == GPIO_PIN_RESET)
+	  {
+		  //HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+		  enco_B1_state = 0;
+	  }
+	  else if(HAL_GPIO_ReadPin(ENCO_B1_GPIO_Port, ENCO_B1_Pin) == GPIO_PIN_SET)
+	  {
+		  //HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+		  enco_B1_state = 1;
+	  }
+
+		sprintf((char*)msg, "A1: %d B1: %d\n\r", enco_A1_state, enco_B1_state);
+		HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 1000);
+		HAL_Delay(50);
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

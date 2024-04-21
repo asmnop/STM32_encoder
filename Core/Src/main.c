@@ -44,7 +44,13 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+	char msg[64];
 
+	uint8_t enco_A1_state = 0;
+	uint8_t enco_B1_state = 0;
+
+	uint8_t enco_A1_state_old = 0;
+	uint8_t enco_B1_state_old = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -65,13 +71,9 @@ void SystemClock_Config(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	char msg[64];
 
-	uint8_t enco_A1_state = 0;
-	uint8_t enco_B1_state = 0;
 
-	uint8_t enco_A1_state_old = 0;
-	uint8_t enco_B1_state_old = 0;
+
 
   /* USER CODE END 1 */
 
@@ -96,42 +98,13 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  if(HAL_GPIO_ReadPin(ENCO_A1_GPIO_Port, ENCO_A1_Pin) == GPIO_PIN_RESET)
-	  {
-		  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
-		  enco_A1_state = 0;
-	  }
-	  else if(HAL_GPIO_ReadPin(ENCO_A1_GPIO_Port, ENCO_A1_Pin) == GPIO_PIN_SET)
-	  {
-		  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
-		  enco_A1_state = 1;
-	  }
-
-	  if(HAL_GPIO_ReadPin(ENCO_B1_GPIO_Port, ENCO_B1_Pin) == GPIO_PIN_RESET)
-	  {
-		  //HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
-		  enco_B1_state = 0;
-	  }
-	  else if(HAL_GPIO_ReadPin(ENCO_B1_GPIO_Port, ENCO_B1_Pin) == GPIO_PIN_SET)
-	  {
-		  //HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
-		  enco_B1_state = 1;
-	  }
-
-	  if( (enco_A1_state != enco_A1_state_old) || (enco_B1_state != enco_B1_state_old) )
-	  {
-			sprintf((char*)msg, "A1: %d B1: %d\n\r", enco_A1_state, enco_B1_state);
-			HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 1000);
-	  }
-
-	  enco_A1_state_old = enco_A1_state;
-	  enco_B1_state_old = enco_B1_state;
 
 		//HAL_Delay(50);
 
@@ -192,6 +165,72 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_GPIO_EXT0_Callback(uint16_t GPIO_Pin)
+{
+	if(HAL_GPIO_ReadPin(ENCO_A1_INT_GPIO_Port, ENCO_A1_INT_Pin) == GPIO_PIN_RESET)
+	{
+	  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+	  enco_A1_state = 0;
+	}
+	else if(HAL_GPIO_ReadPin(ENCO_A1_INT_GPIO_Port, ENCO_A1_INT_Pin) == GPIO_PIN_SET)
+	{
+	  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+	  enco_A1_state = 1;
+	}
+
+	  if( (enco_A1_state != enco_A1_state_old) )
+	  {
+			sprintf((char*)msg, "A1: %d B1: %d\n\r", enco_A1_state, enco_B1_state);
+			HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 1000);
+	  }
+
+	enco_A1_state_old = enco_A1_state;
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	//	Checking the source of interrupt:
+	if(GPIO_Pin == ENCO_A1_INT_Pin)
+	{
+		if(HAL_GPIO_ReadPin(ENCO_A1_INT_GPIO_Port, ENCO_A1_INT_Pin) == GPIO_PIN_RESET)
+		{
+		  //HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+		  enco_A1_state = 0;
+		}
+		else if(HAL_GPIO_ReadPin(ENCO_A1_INT_GPIO_Port, ENCO_A1_INT_Pin) == GPIO_PIN_SET)
+		{
+		  //HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+		  enco_A1_state = 1;
+		}
+	}
+
+	//	Checking the source of interrupt:
+	if(GPIO_Pin == ENCO_B1_INT_Pin)
+	{
+		if(HAL_GPIO_ReadPin(ENCO_B1_INT_GPIO_Port, ENCO_B1_INT_Pin) == GPIO_PIN_RESET)
+		{
+		  //HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+		  enco_B1_state = 0;
+		}
+		else if(HAL_GPIO_ReadPin(ENCO_B1_INT_GPIO_Port, ENCO_B1_INT_Pin) == GPIO_PIN_SET)
+		{
+		  //HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+		  enco_B1_state = 1;
+		}
+	}
+
+	//	If state get changed we have to make a info:
+	if( (enco_A1_state != enco_A1_state_old) || (enco_B1_state != enco_B1_state_old) )
+	{
+		sprintf((char*)msg, "A1: %d B1: %d\n\r", enco_A1_state, enco_B1_state);
+		HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 1000);
+	}
+
+	//	Old value of state get new value:
+	enco_A1_state_old = enco_A1_state;
+	enco_B1_state_old = enco_B1_state;
+}
+
 
 /* USER CODE END 4 */
 
